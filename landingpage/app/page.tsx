@@ -6,8 +6,9 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
-import { Users, MapPin, MessageCircle } from "lucide-react"
+import { Users, MapPin, MessageCircle, Loader2 } from "lucide-react"
 import OccurrenceMap from "@/components/OccurrenceMap"
+import { createUser, type CreateUserRequest } from "@/lib/utils"
 
 export default function PegueOPumbaLanding() {
   const [phone, setPhone] = useState("")
@@ -16,6 +17,8 @@ export default function PegueOPumbaLanding() {
   const [isRegistered, setIsRegistered] = useState(false)
   const [secondPhone, setSecondPhone] = useState("")
   const [isSecondPhoneValid, setIsSecondPhoneValid] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [errorMessage, setErrorMessage] = useState("")
 
   const validatePhone = (phoneNumber: string) => {
     const phoneRegex = /^(\+55\s?)?((\d{2})\s?)?\d{4,5}-?\d{4}$/
@@ -51,10 +54,37 @@ export default function PegueOPumbaLanding() {
     }
   }
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     const hasValidCoordinates = coordinates.some(coord => coord.latitude && coord.longitude)
     if (isPhoneValid && hasValidCoordinates) {
-      setIsRegistered(true)
+      setIsLoading(true)
+      setErrorMessage("")
+
+      try {
+        // Format the data according to the backend API requirements
+        const userData: CreateUserRequest = {
+          phone_number: phone,
+          points_of_interest: coordinates
+            .filter(coord => coord.latitude && coord.longitude)
+            .map(coord => ({
+              latitud: coord.latitude,
+              longitud: coord.longitude
+            }))
+        }
+
+        const result = await createUser(userData)
+        
+        if (result.success) {
+          setIsRegistered(true)
+        } else {
+          setErrorMessage(result.message || "Erro ao registrar usuário")
+        }
+      } catch (error) {
+        console.error('Registration error:', error)
+        setErrorMessage("Erro inesperado ao registrar usuário")
+      } finally {
+        setIsLoading(false)
+      }
     }
   }
 
@@ -109,68 +139,85 @@ export default function PegueOPumbaLanding() {
                 )}
               </div>
 
-                                {isPhoneValid && (
-                    <div className="space-y-4 animate-in slide-in-from-top-2 duration-300">
-                      <p className="text-sm text-primary-foreground/90">
-                        Enviaremos um alerta para um raio de 10km da sua localização quando javalis forem reportados
-                      </p>
-                      <div className="space-y-3">
-                        {coordinates.map((coord, index) => (
-                          <div key={index} className="flex items-center gap-2">
-                            <div className="grid grid-cols-2 gap-2 flex-1">
-                              <Input
-                                type="number"
-                                placeholder="Latitude (-24.883133)"
-                                value={coord.latitude}
-                                onChange={(e) => updateCoordinate(index, 'latitude', e.target.value)}
-                                className="bg-primary-foreground text-foreground placeholder:italic"
-                                step="any"
-                              />
-                              <Input
-                                type="number"
-                                placeholder="Longitude (-53.466666)"
-                                value={coord.longitude}
-                                onChange={(e) => updateCoordinate(index, 'longitude', e.target.value)}
-                                className="bg-primary-foreground text-foreground placeholder:italic"
-                                step="any"
-                              />
-                            </div>
-                            <div className="flex gap-1">
-                              {coordinates.length > 1 && (
-                                <Button
-                                  onClick={() => removeCoordinate(index)}
-                                  variant="outline"
-                                  size="sm"
-                                  className="bg-primary-foreground text-foreground border-primary-foreground/20 hover:bg-primary-foreground/90"
-                                >
-                                  ×
-                                </Button>
-                              )}
-                              {index === coordinates.length - 1 && (
-                                <Button
-                                  onClick={addCoordinate}
-                                  variant="outline"
-                                  size="sm"
-                                  className="bg-primary-foreground/10 text-primary-foreground border-primary-foreground/20 hover:bg-primary-foreground/20"
-                                >
-                                  +
-                                </Button>
-                              )}
-                            </div>
-                          </div>
-                        ))}
+              {isPhoneValid && (
+                <div className="space-y-4 animate-in slide-in-from-top-2 duration-300">
+                  <p className="text-sm text-primary-foreground/90">
+                    Enviaremos um alerta para um raio de 10km da sua localização quando javalis forem reportados
+                  </p>
+                  <div className="space-y-3">
+                    {coordinates.map((coord, index) => (
+                      <div key={index} className="flex items-center gap-2">
+                        <div className="grid grid-cols-2 gap-2 flex-1">
+                          <Input
+                            type="number"
+                            placeholder="Latitude (-24.883133)"
+                            value={coord.latitude}
+                            onChange={(e) => updateCoordinate(index, 'latitude', e.target.value)}
+                            className="bg-primary-foreground text-foreground placeholder:italic"
+                            step="any"
+                          />
+                          <Input
+                            type="number"
+                            placeholder="Longitude (-53.466666)"
+                            value={coord.longitude}
+                            onChange={(e) => updateCoordinate(index, 'longitude', e.target.value)}
+                            className="bg-primary-foreground text-foreground placeholder:italic"
+                            step="any"
+                          />
+                        </div>
+                        <div className="flex gap-1">
+                          {coordinates.length > 1 && (
+                            <Button
+                              onClick={() => removeCoordinate(index)}
+                              variant="outline"
+                              size="sm"
+                              className="bg-primary-foreground text-foreground border-primary-foreground/20 hover:bg-primary-foreground/90"
+                            >
+                              ×
+                            </Button>
+                          )}
+                          {index === coordinates.length - 1 && (
+                            <Button
+                              onClick={addCoordinate}
+                              variant="outline"
+                              size="sm"
+                              className="bg-primary-foreground/10 text-primary-foreground border-primary-foreground/20 hover:bg-primary-foreground/20"
+                            >
+                              +
+                            </Button>
+                          )}
+                        </div>
                       </div>
-                      <Button
-                        onClick={handleRegister}
-                        disabled={!coordinates.some(coord => coord.latitude && coord.longitude)}
-                        className="w-full text-foreground"
-                        style={{ backgroundColor: '#d6ceaa' }}
-                      >
-                        <MapPin className="mr-2 h-4 w-4" />
-                        Registrar para Alertas
-                      </Button>
+                    ))}
+                  </div>
+                  
+                  {/* Error message display */}
+                  {errorMessage && (
+                    <div className="p-3 bg-red-100 border border-red-300 rounded text-red-700 text-sm">
+                      {errorMessage}
                     </div>
                   )}
+                  
+                  <Button
+                    onClick={handleRegister}
+                    disabled={!coordinates.some(coord => coord.latitude && coord.longitude) || isLoading}
+                    className="w-full text-foreground"
+                    style={{ backgroundColor: '#d6ceaa' }}
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Registrando...
+                      </>
+                    ) : (
+                      <>
+                        <MapPin className="mr-2 h-4 w-4" />
+                        Registrar para Alertas
+                      </>
+                    )}
+                  </Button>
+                </div>
+              )}
             </div>
           ) : (
             <div className="max-w-md mx-auto">
