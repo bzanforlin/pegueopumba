@@ -1,5 +1,5 @@
 from backend.app.mcp_app import mcp_app
-from backend.app.routers import user_router
+from backend.app.routers import user_router, occurrences_router
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -19,5 +19,6 @@ app.add_middleware(
     )
 
 app.include_router(user_router.router)
+app.include_router(occurrences_router.router)
 
 app.mount("/tools/", mcp_app)

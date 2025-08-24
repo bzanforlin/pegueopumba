@@ -53,3 +53,43 @@ export async function createUser(userData: CreateUserRequest): Promise<CreateUse
     }
   }
 }
+
+export interface OccurrenceLocation {
+  id: string
+  lat: number
+  lng: number
+  date: string
+}
+
+export interface FetchOccurrencesResponse {
+  occurrences: OccurrenceLocation[]
+  total_count: number
+}
+
+export async function fetchOccurrences(): Promise<OccurrenceLocation[]> {
+  try {
+    const apiUrl = process.env.NEXT_PUBLIC_BACKEND_API_URL
+    if (!apiUrl) {
+      throw new Error('Backend API URL not configured')
+    }
+
+    const response = await fetch(`${apiUrl}/occurrences/`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+
+    const data: FetchOccurrencesResponse = await response.json()
+    
+    // The backend returns the data directly without a 'success' wrapper
+    return data.occurrences || []
+  } catch (error) {
+    console.error('Error fetching occurrences:', error)
+    throw error
+  }
+}

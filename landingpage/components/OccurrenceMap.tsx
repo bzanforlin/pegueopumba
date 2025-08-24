@@ -3,102 +3,10 @@
 import React, { useEffect, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
 import 'leaflet/dist/leaflet.css'
+import { fetchOccurrences, type OccurrenceLocation } from '../lib/utils'
 
 // Remove the top-level Leaflet import and configuration
 // We'll handle this inside useEffect when the component mounts
-
-interface OccurrenceLocation {
-  id: number
-  lat: number
-  lng: number
-  date: string
-}
-
-// Mock API function - replace with actual API endpoint
-const fetchOccurrences = async (): Promise<OccurrenceLocation[]> => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 500))
-  
-  // Mock data - replace this with actual API call
-  return [
-    {
-      id: 1,
-      lat: -23.5505,
-      lng: -46.6333,
-      date: "2025-01-24"
-    },
-    {
-      id: 2,
-      lat: -25.4284,
-      lng: -49.2733,
-      date: "2025-01-23"
-    },
-    {
-      id: 3,
-      lat: -30.0346,
-      lng: -51.2177,
-      date: "2025-01-22"
-    },
-    {
-      id: 4,
-      lat: -19.9167,
-      lng: -43.9345,
-      date: "2025-01-21"
-    },
-    {
-      id: 5,
-      lat: -15.7801,
-      lng: -47.9292,
-      date: "2025-01-20"
-    },
-    {
-      id: 6,
-      lat: -27.5969,
-      lng: -48.5495,
-      date: "2025-01-19"
-    },
-    {
-      id: 7,
-      lat: -22.9068,
-      lng: -43.1729,
-      date: "2025-01-18"
-    },
-    {
-      id: 8,
-      lat: -26.3044,
-      lng: -48.8467,
-      date: "2025-01-17"
-    },
-    {
-      id: 9,
-      lat: -20.2976,
-      lng: -40.2958,
-      date: "2025-01-16"
-    },
-    {
-      id: 10,
-      lat: -29.6914,
-      lng: -53.8008,
-      date: "2025-01-15"
-    }
-  ]
-}
-
-// Real API function - replace the mock function above with this when ready
-const fetchOccurrencesFromAPI = async (): Promise<OccurrenceLocation[]> => {
-  try {
-    const response = await fetch('/api/occurrences')
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
-    const data = await response.json()
-    return data.occurrences || []
-  } catch (error) {
-    console.error('Error fetching occurrences:', error)
-    // Fallback to mock data if API fails
-    return fetchOccurrences()
-  }
-}
 
 const OccurrenceMap: React.FC = () => {
   const mapRef = useRef<HTMLDivElement>(null)
@@ -119,7 +27,7 @@ const OccurrenceMap: React.FC = () => {
       try {
         setLoading(true)
         setError(null)
-        const data = await fetchOccurrencesFromAPI()
+        const data = await fetchOccurrences()
         setOccurrences(data)
       } catch (err) {
         setError('Erro ao carregar ocorrências')

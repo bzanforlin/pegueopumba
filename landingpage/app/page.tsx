@@ -5,36 +5,32 @@ import type React from "react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent } from "@/components/ui/card"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Users, MapPin, MessageCircle, Loader2 } from "lucide-react"
 import OccurrenceMap from "@/components/OccurrenceMap"
 import { createUser, type CreateUserRequest } from "@/lib/utils"
 
+interface CountryCode {
+  code: string
+  label: string
+  flag: string
+}
+
+const countryCodes: CountryCode[] = [
+  { code: "+55", label: "Brasil", flag: "🇧🇷" },
+  { code: "+1", label: "Estados Unidos", flag: "🇺🇸" },
+]
+
 export default function PegueOPumbaLanding() {
+  const [selectedCountryCode, setSelectedCountryCode] = useState<string>("+55")
   const [phone, setPhone] = useState("")
-  const [isPhoneValid, setIsPhoneValid] = useState(false)
   const [coordinates, setCoordinates] = useState([{ latitude: "", longitude: "" }])
   const [isRegistered, setIsRegistered] = useState(false)
-  const [secondPhone, setSecondPhone] = useState("")
-  const [isSecondPhoneValid, setIsSecondPhoneValid] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState("")
 
-  const validatePhone = (phoneNumber: string) => {
-    const phoneRegex = /^(\+55\s?)?((\d{2})\s?)?\d{4,5}-?\d{4}$/
-    return phoneRegex.test(phoneNumber.replace(/\s/g, ""))
-  }
-
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value
-    setPhone(value)
-    setIsPhoneValid(validatePhone(value))
-  }
-
-  const handleSecondPhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value
-    setSecondPhone(value)
-    setIsSecondPhoneValid(validatePhone(value))
+    setPhone(e.target.value)
   }
 
   const addCoordinate = () => {
@@ -56,14 +52,19 @@ export default function PegueOPumbaLanding() {
 
   const handleRegister = async () => {
     const hasValidCoordinates = coordinates.some(coord => coord.latitude && coord.longitude)
-    if (isPhoneValid && hasValidCoordinates) {
+    const hasPhoneNumber = phone.trim().length > 0
+    
+    if (hasPhoneNumber && hasValidCoordinates) {
       setIsLoading(true)
       setErrorMessage("")
 
       try {
+        // Concatenate country code and phone number
+        const fullPhoneNumber = `${selectedCountryCode}${phone.replace(/\s/g, '')}`
+        
         // Format the data according to the backend API requirements
         const userData: CreateUserRequest = {
-          phone_number: phone,
+          phone_number: fullPhoneNumber,
           points_of_interest: coordinates
             .filter(coord => coord.latitude && coord.longitude)
             .map(coord => ({
@@ -125,21 +126,38 @@ export default function PegueOPumbaLanding() {
           {!isRegistered ? (
             <div className="max-w-md mx-auto space-y-4">
               <div className="space-y-2">
-                <Input
-                  type="tel"
-                  placeholder="Digite seu telefone"
-                  value={phone}
-                  onChange={handlePhoneChange}
-                  className="bg-primary-foreground text-foreground"
-                />
-                {phone && !isPhoneValid && (
-                  <p className="text-sm text-primary-foreground/80">
-                    Por favor, digite um número válido (ex: (11) 99999-9999)
+                <div className="flex gap-2">
+                  <Select value={selectedCountryCode} onValueChange={setSelectedCountryCode}>
+                    <SelectTrigger className="w-32 bg-primary-foreground text-foreground">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {countryCodes.map((country) => (
+                        <SelectItem key={country.code} value={country.code}>
+                          <span className="flex items-center gap-2">
+                            <span>{country.flag}</span>
+                            <span>{country.code}</span>
+                          </span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Input
+                    type="tel"
+                    placeholder="Digite seu telefone"
+                    value={phone}
+                    onChange={handlePhoneChange}
+                    className="flex-1 bg-primary-foreground text-foreground"
+                  />
+                </div>
+                {phone && (
+                  <p className="text-sm text-primary-foreground/90">
+                    Número completo: {selectedCountryCode}{phone}
                   </p>
                 )}
               </div>
 
-              {isPhoneValid && (
+              {phone.trim().length > 0 && (
                 <div className="space-y-4 animate-in slide-in-from-top-2 duration-300">
                   <p className="text-sm text-primary-foreground/90">
                     Enviaremos um alerta para um raio de 10km da sua localização quando javalis forem reportados
