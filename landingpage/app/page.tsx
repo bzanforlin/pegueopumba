@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { Users, MapPin, MessageCircle } from "lucide-react"
+import OccurrenceMap from "@/components/OccurrenceMap"
 
 export default function PegueOPumbaLanding() {
   const [phone, setPhone] = useState("")
@@ -70,8 +71,11 @@ export default function PegueOPumbaLanding() {
             <span className="font-semibold text-lg">Pegue o Pumba</span>
           </div>
           <nav className="flex space-x-6">
-            <a href="#about" className="text-foreground hover:text-primary transition-colors">
+            <a href="#junte-se" className="text-foreground hover:text-primary transition-colors">
               Quem Somos
+            </a>
+            <a href="#mapa-ocorrencias" className="text-foreground hover:text-primary transition-colors">
+              Mapa de Ocorrências
             </a>
             <a href="/sua-privacidade" className="text-foreground hover:text-primary transition-colors">
               Sua Privacidade
@@ -213,6 +217,29 @@ export default function PegueOPumbaLanding() {
         </div>
       </section>
 
+      {/* Mapa de Ocorrências Section */}
+      <section id="mapa-ocorrencias" className="py-20 px-4 bg-muted">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6">Mapa de Ocorrências</h2>
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+              Visualize onde os javalis foram reportados em todo o Brasil. Cada ponto representa uma ocorrência 
+              com um raio de 10km para alertas.
+            </p>
+          </div>
+          
+          <div className="mb-8">
+            <OccurrenceMap />
+          </div>
+          
+          <div className="text-center">
+            <p className="text-sm text-muted-foreground">
+              Os círculos representam a área de 10km ao redor de cada ocorrência reportada
+            </p>
+          </div>
+        </div>
+      </section>
+
       <section className="py-16 px-4 bg-background">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-16">
@@ -258,14 +285,14 @@ export default function PegueOPumbaLanding() {
       </section>
 
       {/* Call to Action Section */}
-      <section className="bg-muted py-16 px-4">
+      <section id="junte-se" className="bg-muted py-16 px-4">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-4xl md:text-5xl font-bold mb-8 text-card-foreground">
             Junte-se ao esforço coletivo na caça aos javalis
           </h2>
           <p className="text-2xl md:text-3xl mb-8 text-card-foreground leading-relaxed">
             Pegue o Pumba é um esforço coletivo sem fins lucrativos e independente que recebe alertas de javalis e
-            reporta para quem estiver cadastrado
+            reporta para quem estiver cadastrado, ajudando a proteger terras agrícolas e áreas de preservação em todo o Brasil.
           </p>
           <Button
             onClick={openWhatsApp}

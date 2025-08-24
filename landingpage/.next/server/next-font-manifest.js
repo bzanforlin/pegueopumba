@@ -1,1 +1,0 @@
-self.__NEXT_FONT_MANIFEST="{\"pages\":{},\"app\":{\"/Users/beatrizzanforlin/Documents/AI Explorations/pegue-o-pumba/landingpage/app/layout\":[\"static/media/77a26c5baa7278aa-s.p.woff2\"]},\"appUsingSizeAdjust\":true,\"pagesUsingSizeAdjust\":false}"
