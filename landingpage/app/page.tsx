@@ -91,7 +91,7 @@ export default function PegueOPumbaLanding() {
 
   const openWhatsApp = () => {
     const message = encodeURIComponent("Olá! Gostaria de reportar uma ocorrência de javalis.")
-    window.open(`https://wa.me/5511999999999?text=${message}`, "_blank")
+    window.open(`https://wa.me/15551499619?text=${message}`, "_blank")
   }
 
   return (
