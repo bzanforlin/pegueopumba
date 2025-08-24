@@ -70,8 +70,7 @@ def create_occurrence(latitud: str, longitud: str, phone_number: str):
             "🐗 ALERTA DE JAVALI! 🐗\n\n"
             "Uma ocorrência de javali foi reportada próximo à sua localização. "
             "Mantenha-se atento e tome as devidas precauções.\n\n"
-            f"Coordenadas: {latitud}, {longitud}\n\n"
-            "Para mais informações, acesse nosso sistema."
+            f"Localização: https://www.google.com/maps/search/?api=1&query={latitud},{longitud}\n\n"
         )
 
         whatsapp_results = whatsapp_service.send_bulk_messages(
@@ -80,6 +79,4 @@ def create_occurrence(latitud: str, longitud: str, phone_number: str):
 
     return {
         "message": "Occurrence created",
-        "affected_phone_numbers": phone_numbers,
-        "whatsapp_notifications": whatsapp_results,
     }
