@@ -6,21 +6,40 @@ mcp = FastMCP("Analytics Tools")
 mcp_app = mcp.http_app(path="/mcp")
 
 
-@mcp.tool()
-def create_occurrence(request: CreateOccurenceRequest):
+@mcp.tool(description="""
+    Creates an occurrence in the database and retrieves phone numbers of nearby users.
+
+    This function performs the following steps:
+      1. Calls the `create_occurrence` RPC function in Supabase to store an occurrence
+         with the given latitude, longitude, reporting phone number.
+      2. Calls the `find_users_within_10km` RPC function to retrieve user IDs located
+         within 10 km of the given coordinates.
+      3. Queries the `users` table to fetch phone numbers of the affected users.
+
+    Args:
+        latitud (str): Latitude coordinate of the occurrence.
+        longitud (str): Longitude coordinate of the occurrence.
+        phone_number (str): Phone number of the user reporting the occurrence.
+
+    Returns:
+        dict: A dictionary containing:
+            - "message" (str): Confirmation message ("Occurrence created").
+            - "affected_phone_numbers" (list[str]): List of phone numbers of users 
+              within 10 km of the occurrence location.
+    """)
+def create_occurrence(latitud: str, longitud: str, phone_number: str):
     supabase_client.rpc(
         "create_occurrence",
         {
-            "p_phone_number": request.phone_number,
-            "p_lat": str(request.location.latitude),
-            "p_lng": str(request.location.longitude),
-            "p_chat": request.payload if hasattr(request, "payload") else None,
+            "p_phone_number": phone_number,
+            "p_lat": str(latitud),
+            "p_lng": str(longitud),
         },
     ).execute()
 
     result = supabase_client.rpc(
         "find_users_within_10km",
-        {"lat": str(request.location.latitude), "lng": str(request.location.longitude)},
+        {"lat": str(latitud), "lng": str(longitud)},
     ).execute()
 
     affected_user_ids = [row["user_id"] for row in result.data] if result.data else []
@@ -38,4 +57,4 @@ def create_occurrence(request: CreateOccurenceRequest):
             u["phone_number"] for u in users_result.data if u.get("phone_number")
         ]
 
-    return {"message": "Occurrence created", "affected_phone_numbers": phone_numbers}
+    return {"message": "Occurrence created"}
