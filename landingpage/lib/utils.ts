@@ -77,6 +77,8 @@ export async function fetchOccurrences(): Promise<OccurrenceLocation[]> {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'true',
+        'Access-Control-Allow-Origin': '*'
       },
     })
 
