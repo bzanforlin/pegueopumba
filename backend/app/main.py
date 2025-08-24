@@ -1,7 +1,9 @@
+from backend.app.mcp_app import mcp_app
+from backend.app.routers import user_router
 from fastapi import FastAPI
-from backend.app.routers import user_router, occurrence_router
 
-app = FastAPI(title="FastAPI + Supabase")
+app = FastAPI(title="FastAPI + Supabase", lifespan=mcp_app.lifespan)
 
 app.include_router(user_router.router)
-app.include_router(occurrence_router.router)
+
+app.mount("/tools/", mcp_app)
